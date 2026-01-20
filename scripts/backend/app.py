@@ -1,16 +1,45 @@
 from flask import Flask
 from flask_cors import CORS # 1. Import CORS
 from werkzeug.security import generate_password_hash, check_password_hash
-from database.db import get_db
+from backend.database.db import get_db
 from flask import jsonify, request
-from disease_classifier import diagnose_plant_image
-from sentiment_analyser_model import analyze_crop
-from price_predictor.app import predict
+from backend.disease_classifier import diagnose_plant_image
+from backend.sentiment_analyser_model import analyze_crop
+from backend.price_predictor.app import predict
 import google.generativeai as genai
 import requests
 import os
 import pickle
 import sys
+from backend.surplus_deficit.scripts.visualization_routes import (
+    visualize_routes_with_farmer_highlight
+)
+
+
+
+KARNATAKA_DISTRICTS = {
+    "Bengaluru Urban": {"lat": 12.9716, "lon": 77.5946},
+    "Bengaluru Rural": {"lat": 13.2846, "lon": 77.6070},
+    "Mysuru": {"lat": 12.2958, "lon": 76.6394},
+    "Mandya": {"lat": 12.5223, "lon": 76.8974},
+    "Tumakuru": {"lat": 13.3392, "lon": 77.1130},
+    "Hassan": {"lat": 13.0068, "lon": 76.0996},
+    "Shivamogga": {"lat": 13.9299, "lon": 75.5681},
+    "Chitradurga": {"lat": 14.2306, "lon": 76.3986},
+    "Davanagere": {"lat": 14.4644, "lon": 75.9218},
+    "Ballari": {"lat": 15.1394, "lon": 76.9214},
+    "Vijayapura": {"lat": 16.8302, "lon": 75.7100},
+    "Belagavi": {"lat": 15.8497, "lon": 74.4977},
+    "Dharwad": {"lat": 15.4589, "lon": 75.0078},
+    "Kalaburagi": {"lat": 17.3297, "lon": 76.8343},
+    "Raichur": {"lat": 16.2076, "lon": 77.3463},
+    "Bidar": {"lat": 17.9149, "lon": 77.5046},
+    "Kolar": {"lat": 13.1357, "lon": 78.1326},
+    "Chikkaballapur": {"lat": 13.4355, "lon": 77.7315},
+    "Udupi": {"lat": 13.3409, "lon": 74.7421},
+    "Dakshina Kannada": {"lat": 12.8438, "lon": 75.2479},
+    "Kodagu": {"lat": 12.3375, "lon": 75.8069}
+}
 
 
 
@@ -101,32 +130,28 @@ IMPACT_MAP = {
 
 
 
-def get_weather():
-    # Bangalore Coordinates
-    lat = 12.9
-    long =  77.58
-    
-    # API Endpoint with parameters for current weather and 7-day daily forecast
+def get_weather(lat, lon):
+    """
+    Fetch weather data using latitude and longitude
+    """
     url = "https://api.open-meteo.com/v1/forecast"
     params = {
         "latitude": lat,
-        "longitude": long,
+        "longitude": lon,
         "current": ["temperature_2m", "wind_speed_10m", "relative_humidity_2m"],
         "daily": ["temperature_2m_max", "temperature_2m_min", "precipitation_sum"],
-        "timezone": "auto",  # Automatically detects Asia/Kolkata for these coordinates
+        "timezone": "auto",
         "forecast_days": 7
     }
 
     try:
         response = requests.get(url, params=params)
-        response.raise_for_status()  # Check for HTTP errors
+        response.raise_for_status()
         data = response.json()
 
-        # Extract Current Weather
         current = data.get("current", {})
-        
-        # Extract and format 7-Day Forecast
         daily = data.get("daily", {})
+
         forecast = []
         for i in range(len(daily.get("time", []))):
             forecast.append({
@@ -169,6 +194,16 @@ def farmer_signup():
 
     username = data["username"].strip()
     password = data["password"]
+    district = data["district"].strip()
+
+    # Check if district is valid
+    if district not in KARNATAKA_DISTRICTS:
+        return jsonify({
+            "error": "Invalid district selected"
+        }), 400
+
+    latitude = KARNATAKA_DISTRICTS[district]["lat"]
+    longitude = KARNATAKA_DISTRICTS[district]["lon"]
 
     password_hash = generate_password_hash(password)
 
@@ -188,19 +223,24 @@ def farmer_signup():
             password_hash,
             data.get("full_name"),
             data["village"],
-            data["district"],
-            data.get("latitude"),
-            data.get("longitude")
+            district,
+            latitude,
+            longitude
         ))
 
         conn.commit()
 
         return jsonify({
             "success": True,
-            "message": "Farmer account created successfully"
+            "message": "Farmer account created successfully",
+            "location": {
+                "district": district,
+                "latitude": latitude,
+                "longitude": longitude
+            }
         }), 201
 
-    except Exception as e:
+    except Exception:
         return jsonify({
             "error": "Username already exists"
         }), 409
@@ -333,6 +373,32 @@ def farmer_head_login():
         return jsonify({
             "error": "Invalid username or password"
         }), 401
+    
+    # AUTO-ASSIGN ALL FARMERS TO THIS HEAD
+    conn = get_db()
+    cursor = conn.cursor()
+
+    cursor.execute("SELECT id FROM farmers WHERE is_active = 1")
+    farmers = cursor.fetchall()
+
+    for farmer in farmers:
+        try:
+            cursor.execute("""
+                INSERT OR IGNORE INTO farmer_access (
+                    head_id,
+                    farmer_id,
+                    can_view_soil,
+                    can_view_crops,
+                    can_view_disease
+                )
+                VALUES (?, ?, 1, 1, 1)
+            """, (head["id"], farmer["id"]))
+        except Exception:
+            pass
+
+    conn.commit()
+    conn.close()
+
 
     return jsonify({
         "success": True,
@@ -352,7 +418,39 @@ def analyze(crop: str):
 
 @app.route("/api/weather", methods=["GET"])
 def weather():
-    return get_weather()
+    farmer_id = request.args.get("farmer_id")
+
+    if not farmer_id:
+        return jsonify({
+            "error": "farmer_id query parameter is required"
+        }), 400
+
+    conn = get_db()
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        SELECT latitude, longitude, district
+        FROM farmers
+        WHERE id = ? AND is_active = 1
+    """, (farmer_id,))
+
+    farmer = cursor.fetchone()
+    conn.close()
+
+    if not farmer:
+        return jsonify({
+            "error": "Invalid farmer_id"
+        }), 404
+
+    if farmer["latitude"] is None or farmer["longitude"] is None:
+        return jsonify({
+            "error": "Location not available for this farmer"
+        }), 400
+
+    # ✅ REAL weather calculation based on district-derived coordinates
+    return jsonify(
+        get_weather(farmer["latitude"], farmer["longitude"])
+    )
 
 from flask import request
 
@@ -605,6 +703,62 @@ def soil_nutrient_recommendation():
         return jsonify({
             "error": f"Error processing request: {str(e)}"
         }), 500
+
+@app.route("/api/logistics/map", methods=["GET"])
+def get_logistics_map():
+    district = request.args.get("district")
+
+    if not district:
+        return jsonify({
+            "error": "district query parameter is required"
+        }), 400
+
+    district = district.strip().upper()
+
+    output_dir = os.path.join(app.root_path, "static", "maps")
+    os.makedirs(output_dir, exist_ok=True)
+
+    try:
+        map_filename = visualize_routes_with_farmer_highlight(
+            farmer_city=district,
+            output_dir=output_dir
+        )
+
+        map_url = request.host_url.rstrip("/") + f"/static/maps/{map_filename}"
+
+
+        return jsonify({
+            "success": True,
+            "district": district,
+            "map_url": map_url
+        })
+
+    except Exception as e:
+        return jsonify({
+            "error": f"Failed to generate map: {str(e)}"
+        }), 500
+
+@app.route("/api/head/farmers/<int:head_id>", methods=["GET"])
+def get_farmers_for_head(head_id):
+    conn = get_db()
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        SELECT
+            f.id,
+            f.full_name,
+            f.village,
+            f.district
+        FROM farmer_access fa
+        JOIN farmers f ON fa.farmer_id = f.id
+        WHERE fa.head_id = ?
+    """, (head_id,))
+
+    farmers = [dict(row) for row in cursor.fetchall()]
+    conn.close()
+
+    return jsonify({ "farmers": farmers })
+
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)

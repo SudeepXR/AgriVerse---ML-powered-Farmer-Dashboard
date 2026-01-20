@@ -84,3 +84,12 @@ logs/
 *.pkl
 *.joblib
 *.pth
+
+# Generated files
+*.html
+*.csv
+
+# Generated maps and visualizations
+static/maps/*.html
+surplus_deficit/data/
+

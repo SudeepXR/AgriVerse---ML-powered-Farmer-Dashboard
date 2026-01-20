@@ -3,6 +3,8 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { Search, Sun, ChevronDown, User } from 'lucide-react';
 import { useWeather } from '@/hooks/useWeather';
+import { useSelectedFarmer } from '@/contexts/FarmerSelectionContext';
+import { useEffect, useState } from 'react';
 
 import {
   DropdownMenu,
@@ -17,31 +19,55 @@ const TopBar: React.FC = () => {
   const { language, setLanguage, t } = useLanguage();
   const { user, role, logout } = useAuth();
   const { weather } = useWeather();
+  const { setSelectedFarmer } = useSelectedFarmer();
+  const [farmers, setFarmers] = useState<any[]>([]);
+  const { selectedFarmer } = useSelectedFarmer();
+
+  useEffect(() => {
+    if (role === 'head' && user?.id) {
+      fetch(`http://localhost:5000/api/head/farmers/${user.id}`)
+        .then(res => res.json())
+        .then(data => setFarmers(data.farmers));
+    }
+  }, [role, user]);
 
   return (
     <header className="h-16 bg-card border-b border-border flex items-center justify-between px-6">
       {/* Left Side */}
       <div className="flex items-center gap-4">
         {/* Farm Selector (ONLY for Head) */}
-        {role === 'head' && (
-          <DropdownMenu>
-            <DropdownMenuTrigger className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-full text-sm font-medium hover:bg-primary/90 transition-colors">
-              {t('common.selectFarm')}
-              <ChevronDown className="w-4 h-4" />
-            </DropdownMenuTrigger>
-            <DropdownMenuContent className="bg-card border-border">
-              <DropdownMenuItem className="cursor-pointer">
-                Ramesh Kumar – 5 acres
-              </DropdownMenuItem>
-              <DropdownMenuItem className="cursor-pointer">
-                Lakshmi Devi – 3 acres
-              </DropdownMenuItem>
-              <DropdownMenuItem className="cursor-pointer">
-                Venkat Rao – 8 acres
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        )}
+        {/* Farm Selector (ONLY for Head) */}
+{/* Farm Selector (ONLY for Head) */}
+{role === 'head' && (
+  <DropdownMenu>
+    <DropdownMenuTrigger className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-full text-sm font-medium hover:bg-primary/90 transition-colors">
+      {selectedFarmer
+        ? selectedFarmer.full_name || 'Selected Farmer'
+        : t('common.selectFarm')}
+      <ChevronDown className="w-4 h-4" />
+    </DropdownMenuTrigger>
+
+    <DropdownMenuContent className="bg-card border-border">
+      {farmers.length === 0 && (
+        <DropdownMenuItem disabled>
+          No farmers assigned
+        </DropdownMenuItem>
+      )}
+
+      {farmers.map(farmer => (
+        <DropdownMenuItem
+          key={farmer.id}
+          onClick={() => setSelectedFarmer(farmer)}
+          className="cursor-pointer"
+        >
+          {farmer.full_name || farmer.username} – {farmer.village}
+        </DropdownMenuItem>
+      ))}
+    </DropdownMenuContent>
+  </DropdownMenu>
+)}
+
+
 
         {/* Search */}
         <div className="relative">

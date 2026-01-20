@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Cloud, Droplets, Thermometer, Wind, Sun, CloudRain, AlertTriangle, Loader2 } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
+import { useSelectedFarmer } from '@/contexts/FarmerSelectionContext';
 
 // Helper to map Open-Meteo codes to your icons
 const getWeatherIcon = (code: number) => {
@@ -13,22 +15,54 @@ const Climate: React.FC = () => {
   const { t } = useLanguage();
   const [weatherData, setWeatherData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const { user, role } = useAuth();
+  const { selectedFarmer } = useSelectedFarmer();
+  const farmerId =
+  role === 'farmer'
+    ? user?.id
+    : selectedFarmer?.id;
+    
+  if (!farmerId && role === 'head') {
+    return (
+      <div className="flex items-center justify-center min-h-[300px] text-muted-foreground">
+        Please select a farmer from the top bar to view climate data.
+      </div>
+    );
+  }
+
+  if (!farmerId) {
+    setLoading(false);
+    return;
+  }
 
   useEffect(() => {
-    const fetchWeather = async () => {
-      try {
-        // Replace with your actual API endpoint path
-        const response = await fetch('http://localhost:5000/api/weather'); 
-        const data = await response.json();
-        setWeatherData(data);
-      } catch (error) {
-        console.error("Failed to fetch weather:", error);
-      } finally {
-        setLoading(false);
+  const fetchWeather = async () => {
+    if (!farmerId) {
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const response = await fetch(
+        `http://localhost:5000/api/weather?farmer_id=${farmerId}`
+      );
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to fetch weather');
       }
-    };
-    fetchWeather();
-  }, []);
+
+      setWeatherData(data);
+    } catch (error) {
+      console.error("Failed to fetch weather:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  fetchWeather();
+}, [farmerId]);
+
 
   if (loading) {
     return (
@@ -98,7 +132,7 @@ const Climate: React.FC = () => {
             <div className="text-center">
               <CloudRain className="w-6 h-6 mx-auto text-sky mb-1" />
               <p className="text-lg font-semibold text-foreground">
-                {weatherData?.seven_day_forecast[0].precipitation} mm
+                {weatherData?.seven_day_forecast[0]?.precipitation??0} mm
               </p>
               <p className="text-xs text-muted-foreground">Rainfall</p>
             </div>
@@ -194,6 +228,7 @@ const Climate: React.FC = () => {
         </div>
       </div>
     </div>
+    
   );
 };
 

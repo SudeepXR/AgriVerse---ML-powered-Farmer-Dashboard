@@ -35,7 +35,7 @@ KARNATAKA_KEYWORDS = [
 ]
 
 # =====================================================
-# LOAD MODEL ONCE (STARTUP)
+# LOAD MODEL ONCE
 # =====================================================
 tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME)
 model = AutoModelForSequenceClassification.from_pretrained(MODEL_NAME)
@@ -58,7 +58,7 @@ def bert_sentiment(text):
     inputs = tokenizer(text, return_tensors="pt", truncation=True, max_length=512)
     with torch.no_grad():
         probs = torch.softmax(model(**inputs).logits, dim=1)[0].numpy()
-    return float(probs[2] - probs[0])  # [-1, +1]
+    return float(probs[2] - probs[0])  # range [-1, +1]
 
 def relevance_weight(text, crop):
     text = text.lower()
@@ -82,7 +82,7 @@ def weighted_avg(items):
     return num / den if den else 0.0
 
 # =====================================================
-# CACHED NEWS FETCHERS
+# NEWS FETCHERS
 # =====================================================
 @lru_cache(maxsize=64)
 def fetch_gnews(crop):
@@ -105,7 +105,6 @@ def fetch_gnews(crop):
     items, texts = [], []
     for a in articles:
         text = clean_text(f"{a.get('title','')} {a.get('description','')}")
-
         if not is_karnataka_related(text):
             continue
 
@@ -173,7 +172,7 @@ def fetch_blogs(crop):
     return items, texts
 
 # =====================================================
-# HEADLINE EXTRACTION
+# HEADLINES
 # =====================================================
 def extract_top_headlines(all_texts, crop, top_n=2):
     scored = []
@@ -203,20 +202,21 @@ def trade_signal(score):
     else:
         return "HOLD"
 
+#  NUMERIC PRICE IMPACT (USED BY FRONTEND)
 def price_impact(score):
     if score > 0.4:
-        return "+2% to +5%"
+        return 0.035      # +3.5%
     elif score > 0.15:
-        return "+1% to +2%"
+        return 0.015      # +1.5%
     elif score > -0.15:
-        return "-1% to +1%"
+        return -0.005     # -0.5%
     elif score > -0.4:
-        return "-1% to -3%"
+        return -0.02      # -2%
     else:
-        return "-3% to -5%"
+        return -0.04      # -4%
 
 # =====================================================
-# MAIN ANALYSIS FUNCTION (API-READY)
+# MAIN API FUNCTION
 # =====================================================
 def analyze_crop(crop: str):
     crop = crop.lower().strip()
@@ -235,6 +235,7 @@ def analyze_crop(crop: str):
 
     forecast_sentiment = float(np.clip(current_sentiment * 0.9, -1, 1))
     signal = trade_signal(forecast_sentiment)
+    impact = price_impact(forecast_sentiment)
 
     total_weight = (
         sum(w for _, w in gnews_items) +
@@ -256,8 +257,12 @@ def analyze_crop(crop: str):
         "crop": crop.upper(),
         "current_sentiment": round(current_sentiment, 3),
         "forecast_sentiment": round(forecast_sentiment, 3),
+
+        #  USED BY FRONTEND
         "signal": signal,
-        "price_movement": price_impact(forecast_sentiment),
+        "price_impact": impact,           # numeric
+        "price_impact_pct": impact * 100, # optional UI use
+
         "source_contribution": contributions,
         "headlines": [
             {

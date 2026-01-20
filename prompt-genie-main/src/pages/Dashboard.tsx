@@ -2,7 +2,8 @@ import React from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { useWeather } from '@/hooks/useWeather';
+import { useSelectedFarmer } from '@/contexts/FarmerSelectionContext';
+import { useEffect, useState } from 'react';
 
 import { 
   Heart, 
@@ -18,9 +19,44 @@ import {
 
 const Dashboard: React.FC = () => {
   const { t } = useLanguage();
-  const { user } = useAuth();
+  const { user, role } = useAuth();
+  const { selectedFarmer } = useSelectedFarmer();
   const navigate = useNavigate();
-  const { weather } = useWeather();
+  
+  const [weather, setWeather] = useState<any>(null);
+  const [weatherError, setWeatherError] = useState<string | null>(null);
+  const farmerId =
+    role === 'farmer'
+      ? user?.id
+      : selectedFarmer?.id;
+
+  useEffect(() => {
+    if (!farmerId) {
+      setWeather(null);
+      return;
+    }
+
+    const fetchWeather = async () => {
+      try {
+        const response = await fetch(
+          `http://localhost:5000/api/weather?farmer_id=${farmerId}`
+        );
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.error || 'Failed to fetch weather');
+        }
+
+        setWeather(data);
+        setWeatherError(null);
+      } catch (err: any) {
+        setWeather(null);
+        setWeatherError(err.message);
+      }
+    };
+
+    fetchWeather();
+  }, [farmerId]);
 
   const statusCards = [
     {
@@ -82,20 +118,21 @@ const Dashboard: React.FC = () => {
       {
         icon: Thermometer,
         label: 'Temperature',
-        value: `${Math.round(weather.temperature)}${weather.unit}`,
+        value: `${Math.round(weather.current_weather.temperature)}${weather.current_weather.unit}`,
       },
       {
         icon: Droplets,
         label: 'Humidity',
-        value: `${weather.humidity}%`,
+        value: `${weather.current_weather.humidity}%`,
       },
       {
         icon: Wind,
         label: 'Wind',
-        value: `${weather.wind_speed} km/h`,
+        value: `${weather.current_weather.wind_speed} km/h`,
       },
     ]
   : [];
+
 
 
   return (
@@ -118,6 +155,14 @@ const Dashboard: React.FC = () => {
         </div>
       </div>
 
+      {role === 'head' && !selectedFarmer && (
+        <div className="agri-card border-l-4 border-warning bg-warning/5">
+          <p className="text-sm text-muted-foreground">
+            Please select a farmer from the top bar to view weather data.
+          </p>
+        </div>
+      )}
+
       {/* Weather Summary Card */}
       <div className="agri-card-highlight">
         <div className="flex items-center justify-between">
@@ -125,12 +170,15 @@ const Dashboard: React.FC = () => {
             <h3 className="text-sm font-medium text-muted-foreground mb-1">Today's Weather</h3>
             <p className="text-2xl font-display font-bold text-foreground">
               {weather
-                ? weather.humidity > 70
+                ? weather.current_weather.humidity > 70
                   ? 'Humid Conditions'
-                  : weather.temperature > 30
+                  : weather.current_weather.temperature > 30
                   ? 'Hot Weather'
                   : 'Pleasant Weather'
+                : weatherError
+                ? 'Weather unavailable'
                 : 'Loading...'}
+
             </p>
 
             <p className="text-sm text-muted-foreground mt-1">Perfect for field work</p>

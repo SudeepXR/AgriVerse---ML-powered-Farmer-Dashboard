@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
+import { useSelectedFarmer } from '@/contexts/FarmerSelectionContext';
+
 import {
   Leaf,
   Beaker,
@@ -39,6 +41,7 @@ interface AnalysisResult {
 const SoilHealth: React.FC = () => {
   const { t } = useLanguage();
   const { user, role } = useAuth();
+  const { selectedFarmer } = useSelectedFarmer();
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -76,11 +79,22 @@ const SoilHealth: React.FC = () => {
     setError(null);
 
     // Safety check
-    if (!user?.id || role !== 'farmer') {
+    if (!user?.id) {
       setError('You must be logged in as a farmer to analyze soil health.');
       setLoading(false);
       return;
     }
+    const farmerId =
+      role === 'farmer'
+        ? user.id
+        : selectedFarmer?.id;
+
+    if (!farmerId) {
+      setError('Please select a farmer first.');
+      setLoading(false);
+      return;
+    }
+
 
     try {
       const response = await fetch('http://localhost:5000/nutrient', {
@@ -88,7 +102,7 @@ const SoilHealth: React.FC = () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ...formData,
-          farmer_id: user.id
+          farmer_id: farmerId
         })
       });
 
