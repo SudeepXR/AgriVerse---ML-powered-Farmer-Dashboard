@@ -81,6 +81,14 @@ This is a **full-stack farming advisory system** that combines:
 - Secure login system
 - Session persistence with localStorage
 - Farmer profile management
+- Dual role support: Farmers & Farm Heads
+
+### 9. 📍 Supply Chain & Logistics
+- Food surplus & deficit mapping
+- Route optimization for food distribution
+- Farmer location visualization
+- Shipment tracking and planning
+- Shelf life prediction for perishables
 
 ---
 
@@ -88,61 +96,109 @@ This is a **full-stack farming advisory system** that combines:
 
 ```
 EL_3/
-├── scripts/backend/
-│   ├── app.py                          # Main Flask application (all endpoints)
-│   ├── disease_classifier.py           # Plant disease detection model
-│   ├── sentiment_analyser_model.py     # Crop sentiment analysis
-│   ├── database/
-│   │   ├── db.py                       # Database connection manager
-│   │   ├── init_db.py                  # Database initialization & schema
-│   │   └── agriculture.db              # SQLite database
-│   ├── price_predictor/
-│   │   ├── app.py                      # Price prediction model
-│   │   └── models/
-│   │       └── global_lstm.h5          # Trained LSTM model
-│   └── requirements.txt                # Python dependencies
+├── .gitignore                          # Git ignore rules
+├── README.md                           # Project documentation
 │
-├── soil_nutrient_recommender/
+├── scripts/                            # Backend Python modules
+│   ├── __init__.py                     # Python package marker
+│   └── backend/
+│       ├── __init__.py                 # Python package marker
+│       ├── app.py                      # Main Flask application (all endpoints)
+│       ├── disease_classifier.py       # Plant disease detection model
+│       ├── sentiment_analyser_model.py # Crop sentiment analysis
+│       ├── database/
+│       │   ├── __init__.py            # Python package marker
+│       │   ├── db.py                   # Database connection manager
+│       │   ├── init_db.py              # Database initialization & schema
+│       │   └── agriculture.db          # SQLite database
+│       ├── price_predictor/
+│       │   ├── app.py                  # Price prediction model
+│       │   └── models/
+│       │       └── global_lstm.h5      # Trained LSTM model
+│       ├── static/
+│       │   └── maps/                   # Generated logistics maps (not committed)
+│       ├── surplus_deficit/            # Supply chain & logistics module
+│       │   ├── __init__.py            # Python package marker
+│       │   ├── requirements.txt        # Logistics dependencies
+│       │   ├── data/
+│       │   │   ├── clustered_data.csv
+│       │   │   ├── farmer_map.html
+│       │   │   ├── optimized_shipments_with_latlon.csv
+│       │   │   └── processed_data.csv  # (not committed)
+│       │   └── scripts/
+│       │       ├── __init__.py        # Python package marker
+│       │       ├── add_latlon.py
+│       │       ├── clustering_and_coords.py
+│       │       ├── data_preprocessing.py
+│       │       ├── farmer_api.py
+│       │       ├── farmer_map.py
+│       │       ├── optimization.py
+│       │       ├── results_analysis.py
+│       │       ├── shelf_life_prediction.py
+│       │       ├── visualization_routes.py  # Logistics map visualization
+│       │       └── requirements.txt
+│       └── requirements.txt            # Backend dependencies
+│
+├── soil_nutrient_recommender/          # Soil nutrient analysis module
+│   ├── .gitignore
 │   ├── nutrient_model.py              # Soil nutrient analyzer script
-│   ├── soil_nutrient_model.pkl        # Trained nutrient recommendation model
-│   └── requirements.txt                # Python dependencies
-│
-├── prompt-genie-main/
-│   ├── src/
-│   │   ├── App.tsx                     # Main application component
-│   │   ├── pages/                      # All feature pages
-│   │   │   ├── Login.tsx              # Farmer login page
-│   │   │   ├── Signup.tsx             # Farmer registration
-│   │   │   ├── Dashboard.tsx          # Main dashboard
-│   │   │   ├── AIAssistant.tsx        # Chatbot interface
-│   │   │   ├── CropDoctor.tsx         # Disease diagnosis
-│   │   │   ├── SoilHealth.tsx         # Soil analysis
-│   │   │   ├── Climate.tsx            # Weather forecasting
-│   │   │   ├── MarketProfit.tsx       # Price prediction
-│   │   │   ├── CropRecommendation.tsx # Crop suggestions
-│   │   │   └── YieldPlanning.tsx      # Yield forecasting
-│   │   ├── components/                 # Reusable UI components
-│   │   ├── contexts/                   # React context (Auth, Language)
-│   │   └── hooks/                      # Custom React hooks
-│   ├── package.json                    # Frontend dependencies
-│   └── vite.config.ts                  # Vite build configuration
-│   ├── soil_nutrient_model.pkl        # Trained ML model (serialized)
-│   └── Crop_recommendation.csv        # Training data
+│   ├── soil_nutrient_model.pkl        # Trained ML model (not committed)
+│   ├── Crop_recommendation.csv        # Training dataset
+│   └── requirements.txt                # Module dependencies
 │
 └── prompt-genie-main/                  # React Frontend
+    ├── public/
+    │   └── robots.txt
     ├── src/
+    │   ├── App.tsx                     # Main application component
+    │   ├── App.css
+    │   ├── index.css
+    │   ├── main.tsx                    # React entry point
     │   ├── pages/
-    │   │   ├── Dashboard.tsx           # Main dashboard overview
-    │   │   ├── Login.tsx               # Authentication page
-    │   │   ├── SoilHealth.tsx          # Soil nutrient analyzer UI
-    │   │   ├── CropDoctor.tsx          # Disease diagnosis UI
-    │   │   ├── Climate.tsx             # Weather data display
-    │   │   ├── MarketProfit.tsx        # Price predictions & market trends
-    │   │   ├── CropRecommendation.tsx  # Crop suggestions
-    │   │   ├── YieldPlanning.tsx       # Yield forecasting
-    │   │   ├── AIAssistant.tsx         # Chatbot interface
-    │   │   ├── NotFound.tsx            # 404 page
-    │   │   └── Index.tsx               # Landing page
+    │   │   ├── Login.tsx              # Farmer login page
+    │   │   ├── Signup.tsx             # Farmer registration
+    │   │   ├── Dashboard.tsx          # Main dashboard with weather
+    │   │   ├── AIAssistant.tsx        # Chatbot interface
+    │   │   ├── CropDoctor.tsx         # Disease diagnosis
+    │   │   ├── SoilHealth.tsx         # Soil analysis
+    │   │   ├── Climate.tsx            # Weather forecasting
+    │   │   ├── MarketProfit.tsx       # Price prediction
+    │   │   ├── CropRecommendation.tsx # Crop suggestions
+    │   │   ├── YieldPlanning.tsx      # Yield forecasting
+    │   │   └── NotFound.tsx           # 404 error page
+    │   ├── components/
+    │   │   ├── NavLink.tsx            # Navigation link component
+    │   │   ├── layout/
+    │   │   │   ├── DashboardLayout.tsx    # Main layout wrapper
+    │   │   │   ├── Sidebar.tsx            # Navigation sidebar
+    │   │   │   └── TopBar.tsx             # Top navigation bar
+    │   │   └── ui/                    # Shadcn UI components
+    │   │       └── (30+ reusable components)
+    │   ├── contexts/
+    │   │   ├── AuthContext.tsx        # User authentication state
+    │   │   ├── FarmerSelectionContext.tsx  # Selected farmer for farm heads
+    │   │   └── LanguageContext.tsx    # Multi-language support
+    │   ├── hooks/
+    │   │   ├── use-mobile.tsx         # Mobile screen detection
+    │   │   ├── use-toast.ts           # Toast notification hook
+    │   │   └── useWeather.ts          # Weather data hook
+    │   ├── lib/
+    │   │   └── utils.ts               # Utility functions
+    │   ├── data/
+    │   │   └── cropDistrictMap.ts     # Crop-district mapping
+    │   └── test/
+    │       ├── example.test.ts
+    │       └── setup.ts
+    ├── package.json                    # Frontend dependencies
+    ├── vite.config.ts                  # Vite build configuration
+    ├── tsconfig.json                   # TypeScript configuration
+    ├── tailwind.config.ts              # Tailwind CSS configuration
+    ├── postcss.config.js               # PostCSS configuration
+    ├── eslint.config.js                # ESLint configuration
+    ├── components.json                 # Shadcn UI config
+    ├── index.html                      # HTML entry point
+    └── README.md
+```
     │   │
     │   ├── components/
     │   │   ├── layout/
@@ -243,7 +299,12 @@ export GOOGLE_API_KEY="your-gemini-api-key"
 # On Windows: set GOOGLE_API_KEY=your-gemini-api-key
 ```
 
-5. **Run Flask server:**
+5. **Install surplus deficit module dependencies (optional):**
+```bash
+pip install -r surplus_deficit/requirements.txt
+```
+
+6. **Run Flask server:**
 ```bash
 python app.py
 ```
@@ -270,6 +331,18 @@ npm run dev
 bun run dev
 ```
 Frontend will start on `http://localhost:5173`
+
+### Important Notes
+
+#### Python Module Structure
+- The `scripts/` directory is a Python package with `__init__.py` files
+- Backend imports use relative paths: `from backend.surplus_deficit.scripts import visualization_routes`
+- Path resolution is handled automatically by Python's module system
+
+#### Path Handling in Python Scripts
+- Logistics visualization uses relative paths via `os.path` for cross-platform compatibility
+- Example: `os.path.join(script_dir, "..", "data")` to resolve data directory
+- This ensures scripts work regardless of where the project is located
 
 ---
 
@@ -593,20 +666,49 @@ Error (400 Bad Request):
 
 ---
 
+## � State Management (React Contexts)
+
+### AuthContext
+Manages user authentication state and login/logout operations.
+
+**Provided Values:**
+- `user`: Current logged-in user object
+- `role`: User role ('farmer' or 'head')
+- `login()`: Function to authenticate user
+- `logout()`: Function to clear authentication
+
+### FarmerSelectionContext
+Allows farm heads to select a specific farmer to view their data.
+
+**Provided Values:**
+- `selectedFarmer`: Currently selected farmer object
+- `setSelectedFarmer()`: Function to update selected farmer
+- `farmers`: List of available farmers (for farm heads)
+
+### LanguageContext
+Provides multi-language support for the dashboard.
+
+**Provided Values:**
+- `language`: Current language setting
+- `t()`: Translation function for getting localized strings
+- `setLanguage()`: Function to change language
+
+---
+
 ## 📱 Frontend Pages
 
 | Page | Route | Purpose |
 |------|-------|---------|
-| Dashboard | `/` | Overview of farm metrics & quick stats |
-| Login | `/login` | User authentication |
-| Soil Health | `/soil-health` | Nutrient analysis & recommendations |
-| Crop Doctor | `/crop-doctor` | Disease detection via image upload |
-| Climate | `/climate` | Weather forecasts & climate data |
-| Market Profit | `/market-profit` | Price predictions & market trends |
-| Crop Recommendation | `/crop-recommendation` | AI-suggested crops |
-| Yield Planning | `/yield-planning` | Yield forecasting tools |
-| AI Assistant | `/ai-assistant` | Chatbot interface |
-| Not Found | `/404` | Error page |
+| Dashboard | `/` | Overview of farm metrics & quick stats with weather |
+| Login | `/login` | User authentication (farmer & farm head) |
+| Soil Health | `/soil-health` | Nutrient analysis & fertilizer recommendations |
+| Crop Doctor | `/crop-doctor` | Disease detection via plant image upload |
+| Climate | `/climate` | Weather forecasts & climate risk assessment |
+| Market Profit | `/market-profit` | Price predictions & market trend analysis |
+| Crop Recommendation | `/crop-recommendation` | AI-suggested crops based on conditions |
+| Yield Planning | `/yield-planning` | Yield forecasting & growth projections |
+| AI Assistant | `/ai-assistant` | Chatbot interface for farming advice |
+| Not Found | `/404` | Error page for undefined routes |
 
 ---
 
