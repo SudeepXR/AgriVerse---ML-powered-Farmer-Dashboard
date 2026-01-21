@@ -1,0 +1,60 @@
+{
+  "timestamp": "2026-01-20T16:36:03.892839",
+  "model_type": "RandomForestClassifier",
+  "validation_results": [
+    {
+      "test": "ranking_stability",
+      "noise_level": 0.05,
+      "avg_top_k_overlap": 0.6368636363636364,
+      "interpretation": "High overlap (>0.8) indicates robust decision boundaries."
+    },
+    {
+      "test": "noise_sensitivity",
+      "details": [
+        {
+          "sample_id": 2018,
+          "original_max_conf": 0.8165905587756849,
+          "noisy_max_conf": 0.6242087978567107,
+          "drop": 0.1923817609189742
+        },
+        {
+          "sample_id": 1897,
+          "original_max_conf": 0.9773746196534586,
+          "noisy_max_conf": 0.343656462585034,
+          "drop": 0.6337181570684246
+        },
+        {
+          "sample_id": 1938,
+          "original_max_conf": 0.9791333303073568,
+          "noisy_max_conf": 0.47911764705882354,
+          "drop": 0.5000156832485333
+        },
+        {
+          "sample_id": 392,
+          "original_max_conf": 0.9814517254153269,
+          "noisy_max_conf": 0.8578339679886071,
+          "drop": 0.12361775742671977
+        },
+        {
+          "sample_id": 630,
+          "original_max_conf": 0.9391495232119184,
+          "noisy_max_conf": 0.3756420901932713,
+          "drop": 0.563507433018647
+        }
+      ],
+      "avg_confidence_drop": 0.4026481583362598,
+      "interpretation": "Positive drop means model becomes less certain with bad inputs (Good)."
+    },
+    {
+      "test": "confidence_distribution",
+      "distribution": {
+        "0.0-0.2": 0,
+        "0.2-0.4": 0,
+        "0.4-0.6": 10,
+        "0.6-0.8": 124,
+        "0.8-1.0": 2066
+      },
+      "interpretation": "Should not be clustered solely at 1.0. Spread implies healthy uncertainty."
+    }
+  ]
+}

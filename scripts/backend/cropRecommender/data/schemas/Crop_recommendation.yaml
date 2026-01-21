@@ -1,0 +1,75 @@
+# Schema: Crop_recommendation.csv
+# Type: Primary ML Training Data
+# Role: Similarity Ranking Engine
+
+fields:
+  N:
+    type: float
+    description: Ratio of Nitrogen content in soil
+    unit: kg/ha (implied)
+    expected_range: 0 - 140
+    missing_rate: 0%
+    source: Synthetic/Aggregated
+    risk: none
+
+  P:
+    type: float
+    description: Ratio of Phosphorous content in soil
+    unit: kg/ha (implied)
+    expected_range: 5 - 145
+    missing_rate: 0%
+    source: Synthetic/Aggregated
+    risk: none
+
+  K:
+    type: float
+    description: Ratio of Potassium content in soil
+    unit: kg/ha (implied)
+    expected_range: 5 - 205
+    missing_rate: 0%
+    source: Synthetic/Aggregated
+    risk: none
+
+  temperature:
+    type: float
+    description: Temperature in degrees Celsius
+    unit: Celsius
+    expected_range: 8.8 - 43.7
+    missing_rate: 0%
+    source: Synthetic/Aggregated
+    risk: none
+
+  humidity:
+    type: float
+    description: Relative humidity in %
+    unit: percentage
+    expected_range: 14.2 - 99.9
+    missing_rate: 0%
+    source: Synthetic/Aggregated
+    risk: none
+
+  ph:
+    type: float
+    description: pH value of the soil
+    unit: pH scale
+    expected_range: 3.5 - 9.9
+    missing_rate: 0%
+    source: Synthetic/Aggregated
+    risk: none
+
+  rainfall:
+    type: float
+    description: Rainfall in mm
+    unit: mm
+    expected_range: 20.2 - 298.6
+    missing_rate: 0%
+    source: Synthetic/Aggregated
+    risk: none
+
+  label:
+    type: string
+    description: Name of the crop
+    unique_values: 22 classes
+    missing_rate: 0%
+    source: Ground Truth
+    risk: none

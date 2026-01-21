@@ -1,0 +1,114 @@
+# Schema: CropDataset-Enhanced.csv
+# Type: Primary Regional Filter
+# Role: Hard Filter (Physical Feasibility) & Imputation Source
+
+fields:
+  Address:
+    type: string
+    description: District/Locality name
+    missing_rate: 0%
+    granularity: District/Locality
+
+  Status geocode:
+    type: string
+    description: Geocoding status metadata
+    missing_rate: 0%
+
+  Formatted address:
+    type: string
+    description: Full address string
+    missing_rate: 0%
+
+  Latitude:
+    type: float
+    description: Location latitude
+    missing_rate: 0%
+
+  Longitude:
+    type: float
+    description: Location longitude
+    missing_rate: 0%
+
+  Region:
+    type: string
+    description: State or administrative region
+    missing_rate: 0%
+
+  Crop:
+    type: string
+    description: Comma-separated list of crops grown in this location
+    missing_rate: 0%
+    risk: Requires parsing/splitting. This is the source of truth for "what grows here".
+
+  Nitrogen - High:
+    type: string
+    description: Percentage of soil samples with High N
+    format: "XX.XX%"
+    missing_rate: ~4.8%
+    risk: String type requires parsing to float.
+
+  Nitrogen - Medium:
+    type: string
+    description: Percentage of soil samples with Medium N
+    format: "XX.XX%"
+    missing_rate: ~4.8%
+
+  Nitrogen - Low:
+    type: string
+    description: Percentage of soil samples with Low N
+    format: "XX.XX%"
+    missing_rate: ~4.8%
+
+  Phosphorous - High:
+    type: string
+    description: Percentage of soil samples with High P
+    format: "XX.XX%"
+    missing_rate: ~4.8%
+
+  Phosphorous - Medium:
+    type: string
+    description: Percentage of soil samples with Medium P
+    format: "XX.XX%"
+    missing_rate: ~4.8%
+
+  Phosphorous - Low:
+    type: string
+    description: Percentage of soil samples with Low P
+    format: "XX.XX%"
+    missing_rate: ~4.8%
+
+  Potassium - High:
+    type: string
+    description: Percentage of soil samples with High K
+    format: "XX.XX%"
+    missing_rate: ~4.8%
+
+  Potassium - Medium:
+    type: string
+    description: Percentage of soil samples with Medium K
+    format: "XX.XX%"
+    missing_rate: ~4.8%
+
+  Potassium - Low:
+    type: string
+    description: Percentage of soil samples with Low K
+    format: "XX.XX%"
+    missing_rate: ~4.8%
+
+  pH - Acidic:
+    type: string
+    description: Percentage of soil samples with Acidic pH
+    format: "XX.XX%"
+    missing_rate: ~4.8%
+
+  pH - Neutral:
+    type: string
+    description: Percentage of soil samples with Neutral pH
+    format: "XX.XX%"
+    missing_rate: ~4.8%
+
+  pH - Alkaline:
+    type: string
+    description: Percentage of soil samples with Alkaline pH
+    format: "XX.XX%"
+    missing_rate: ~4.8%

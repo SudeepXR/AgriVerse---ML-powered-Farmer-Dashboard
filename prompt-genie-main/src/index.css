@@ -1,0 +1,222 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Nunito:wght@400;500;600;700;800&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
+@layer base {
+  :root {
+    /* Agricultural Color Palette */
+    --background: 60 20% 97%;
+    --foreground: 150 30% 15%;
+
+    --card: 60 25% 99%;
+    --card-foreground: 150 30% 15%;
+
+    --popover: 60 25% 99%;
+    --popover-foreground: 150 30% 15%;
+
+    /* Primary - Deep Forest Green */
+    --primary: 150 40% 25%;
+    --primary-foreground: 60 20% 97%;
+
+    /* Secondary - Soft Sage */
+    --secondary: 120 25% 92%;
+    --secondary-foreground: 150 30% 20%;
+
+    /* Muted - Light Cream */
+    --muted: 45 30% 94%;
+    --muted-foreground: 150 15% 45%;
+
+    /* Accent - Warm Yellow-Green */
+    --accent: 75 60% 50%;
+    --accent-foreground: 150 40% 15%;
+
+    /* Success - Fresh Green */
+    --success: 142 70% 45%;
+    --success-foreground: 60 20% 97%;
+
+    /* Warning - Warm Amber */
+    --warning: 38 92% 50%;
+    --warning-foreground: 150 40% 15%;
+
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 60 20% 97%;
+
+    --border: 120 15% 88%;
+    --input: 120 15% 88%;
+    --ring: 150 40% 35%;
+
+    --radius: 0.75rem;
+
+    /* Sidebar - Dark Green */
+    --sidebar-background: 150 35% 18%;
+    --sidebar-foreground: 60 20% 92%;
+    --sidebar-primary: 75 60% 55%;
+    --sidebar-primary-foreground: 150 40% 15%;
+    --sidebar-accent: 150 30% 25%;
+    --sidebar-accent-foreground: 60 20% 92%;
+    --sidebar-border: 150 25% 25%;
+    --sidebar-ring: 75 60% 55%;
+
+    /* Custom Agricultural Tokens */
+    --leaf-green: 142 55% 42%;
+    --soil-brown: 30 35% 35%;
+    --wheat-gold: 45 80% 55%;
+    --sky-blue: 200 70% 55%;
+    --harvest-orange: 25 90% 55%;
+  }
+
+  .dark {
+    --background: 150 30% 8%;
+    --foreground: 60 20% 92%;
+
+    --card: 150 25% 12%;
+    --card-foreground: 60 20% 92%;
+
+    --popover: 150 25% 12%;
+    --popover-foreground: 60 20% 92%;
+
+    --primary: 75 60% 55%;
+    --primary-foreground: 150 40% 10%;
+
+    --secondary: 150 25% 18%;
+    --secondary-foreground: 60 20% 92%;
+
+    --muted: 150 20% 18%;
+    --muted-foreground: 60 10% 60%;
+
+    --accent: 75 50% 45%;
+    --accent-foreground: 150 40% 10%;
+
+    --destructive: 0 62% 30%;
+    --destructive-foreground: 60 20% 92%;
+
+    --border: 150 20% 22%;
+    --input: 150 20% 22%;
+    --ring: 75 60% 55%;
+
+    --sidebar-background: 150 35% 10%;
+    --sidebar-foreground: 60 20% 88%;
+    --sidebar-primary: 75 60% 55%;
+    --sidebar-primary-foreground: 150 40% 10%;
+    --sidebar-accent: 150 30% 15%;
+    --sidebar-accent-foreground: 60 20% 88%;
+    --sidebar-border: 150 25% 18%;
+    --sidebar-ring: 75 60% 55%;
+
+    --leaf-green: 142 55% 50%;
+    --soil-brown: 30 35% 45%;
+    --wheat-gold: 45 80% 60%;
+    --sky-blue: 200 70% 60%;
+    --harvest-orange: 25 90% 60%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+    font-family: 'Inter', 'Nunito', sans-serif;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Nunito', 'Inter', sans-serif;
+  }
+}
+
+@layer components {
+  /* Dashboard Card Styles */
+  .agri-card {
+    @apply bg-card rounded-2xl shadow-sm border border-border/50 p-6 transition-all duration-300 hover:shadow-md hover:border-primary/20;
+  }
+
+  .agri-card-highlight {
+    @apply agri-card bg-gradient-to-br from-card to-secondary/30;
+  }
+
+  /* Status Indicators */
+  .status-good {
+    @apply bg-success/15 text-success border-success/30;
+  }
+
+  .status-moderate {
+    @apply bg-warning/15 text-warning border-warning/30;
+  }
+
+  .status-poor {
+    @apply bg-destructive/15 text-destructive border-destructive/30;
+  }
+
+  /* Sidebar Navigation */
+  .sidebar-nav-item {
+    @apply flex items-center gap-3 px-4 py-3 rounded-xl text-sidebar-foreground/80 transition-all duration-200 hover:bg-sidebar-accent hover:text-sidebar-foreground;
+  }
+
+  .sidebar-nav-item.active {
+    @apply bg-sidebar-primary text-sidebar-primary-foreground font-medium shadow-sm;
+  }
+
+  /* Action Buttons */
+  .agri-btn-primary {
+    @apply bg-primary text-primary-foreground hover:bg-primary/90 px-6 py-3 rounded-xl font-medium transition-all duration-200 shadow-sm hover:shadow-md;
+  }
+
+  .agri-btn-secondary {
+    @apply bg-secondary text-secondary-foreground hover:bg-secondary/80 px-6 py-3 rounded-xl font-medium transition-all duration-200;
+  }
+
+  .agri-btn-accent {
+    @apply bg-accent text-accent-foreground hover:bg-accent/90 px-6 py-3 rounded-xl font-medium transition-all duration-200 shadow-sm hover:shadow-md;
+  }
+
+  /* Input Fields */
+  .agri-input {
+    @apply w-full px-4 py-3 rounded-xl border border-input bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all duration-200;
+  }
+
+  /* Language Toggle */
+  .lang-toggle {
+    @apply flex items-center gap-1 bg-secondary rounded-full p-1;
+  }
+
+  .lang-toggle-btn {
+    @apply px-4 py-1.5 rounded-full text-sm font-medium transition-all duration-200;
+  }
+
+  .lang-toggle-btn.active {
+    @apply bg-primary text-primary-foreground shadow-sm;
+  }
+
+  .lang-toggle-btn:not(.active) {
+    @apply text-muted-foreground hover:text-foreground;
+  }
+}
+
+@layer utilities {
+  /* Smooth transitions */
+  .transition-smooth {
+    @apply transition-all duration-300 ease-in-out;
+  }
+
+  /* Glass effect */
+  .glass {
+    @apply bg-background/80 backdrop-blur-md;
+  }
+
+  /* Gradient backgrounds */
+  .gradient-primary {
+    background: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--leaf-green)));
+  }
+
+  .gradient-accent {
+    background: linear-gradient(135deg, hsl(var(--accent)), hsl(var(--wheat-gold)));
+  }
+
+  .gradient-warm {
+    background: linear-gradient(135deg, hsl(var(--wheat-gold)), hsl(var(--harvest-orange)));
+  }
+}

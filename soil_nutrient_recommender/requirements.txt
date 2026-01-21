@@ -1,0 +1,9 @@
+pandas
+numpy
+scikit-learn
+<<<<<<< HEAD
+matplotlib
+seaborn
+=======
+scipy
+>>>>>>> e212074b054bbaa44611b97a0c14d3c880c4b84e

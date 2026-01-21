@@ -1,0 +1,30 @@
+{
+  "scenarios": {
+    "happy_path": {
+      "confidence": {
+        "Low": 438,
+        "High": 49,
+        "Medium": 13
+      },
+      "coverage": {
+        "high": 500
+      }
+    },
+    "missing_soil": {
+      "confidence": {
+        "Low": 500
+      },
+      "coverage": {
+        "high": 500
+      }
+    },
+    "unknown_region": {
+      "confidence": {
+        "Low": 500
+      },
+      "coverage": {
+        "low": 500
+      }
+    }
+  }
+}

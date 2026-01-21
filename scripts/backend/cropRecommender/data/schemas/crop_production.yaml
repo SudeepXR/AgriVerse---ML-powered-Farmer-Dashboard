@@ -1,0 +1,44 @@
+# Schema: crop_production.csv
+# Type: Secondary / Historical
+# Role: Historical Validation & Seasonality Check
+
+fields:
+  State_Name:
+    type: string
+    description: Name of the state
+    missing_rate: 0%
+
+  District_Name:
+    type: string
+    description: Name of the district
+    missing_rate: 0%
+
+  Crop_Year:
+    type: integer
+    description: Year of production
+    expected_range: 1997 - 2015
+    missing_rate: 0%
+
+  Season:
+    type: string
+    description: Agricultural season
+    missing_rate: 0%
+    risk: Contains trailing whitespace (e.g. 'Kharif     '). Needs trimming.
+
+  Crop:
+    type: string
+    description: Name of the crop
+    missing_rate: 0%
+
+  Area:
+    type: float
+    description: Area under cultivation
+    unit: Hectares (implied)
+    missing_rate: 0%
+
+  Production:
+    type: float
+    description: Total production
+    unit: Tonnes (implied, varies by crop)
+    missing_rate: ~1.5%
+    risk: Missing values need handling (e.g. fill 0 or drop). Units differ for crops like Cotton (bales) vs Coconut (nuts).
