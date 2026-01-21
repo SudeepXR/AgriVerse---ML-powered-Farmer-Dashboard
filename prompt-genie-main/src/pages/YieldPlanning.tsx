@@ -40,12 +40,15 @@ const LogisticsMap: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+<<<<<<< HEAD
   // Shelf Life State
   const [harvestDate, setHarvestDate] = useState("");
   const [transportHours, setTransportHours] = useState("");
   const [shelfLifeResult, setShelfLifeResult] = useState<any>(null);
   const [shelfLifeLoading, setShelfLifeLoading] = useState(false);
 
+=======
+>>>>>>> 275b2b8fe38f187a469b7f1a67a8f35f99b033ee
   const fetchMap = async (selectedDistrict: string) => {
     setLoading(true);
     setError(null);
@@ -70,6 +73,7 @@ const LogisticsMap: React.FC = () => {
     }
   };
 
+<<<<<<< HEAD
   const predictShelfLife = async () => {
     if (!district || !harvestDate || !transportHours) {
       // You might want to show a toast or error here
@@ -98,6 +102,8 @@ const LogisticsMap: React.FC = () => {
     }
   };
 
+=======
+>>>>>>> 275b2b8fe38f187a469b7f1a67a8f35f99b033ee
   const handleDistrictChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const value = e.target.value;
     setDistrict(value);
@@ -108,6 +114,7 @@ const LogisticsMap: React.FC = () => {
   };
 
   return (
+<<<<<<< HEAD
     <div className="p-6 space-y-6 animate-fade-in grid grid-cols-1 md:grid-cols-2 gap-6">
       <div className="space-y-6">
         <div className="agri-card">
@@ -232,6 +239,59 @@ const LogisticsMap: React.FC = () => {
           </div>
         )}
       </div>
+=======
+    <div className="p-6 space-y-6 animate-fade-in">
+      {/* Input */}
+      <div className="max-w-md">
+        <label className="block text-sm font-medium mb-2">
+          Select District (Karnataka)
+        </label>
+        <select
+          value={district}
+          onChange={handleDistrictChange}
+          className="agri-input w-full"
+        >
+          <option value="">-- Select District --</option>
+          {KARNATAKA_DISTRICTS.map((d) => (
+            <option key={d} value={d}>
+              {d}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      {/* Loading */}
+      {loading && (
+        <p className="text-sm text-muted-foreground">
+          Generating logistics map…
+        </p>
+      )}
+
+      {/* Error */}
+      {error && (
+        <p className="text-sm text-destructive">
+          {error}
+        </p>
+      )}
+
+      {/* Map */}
+      {mapUrl && (
+        <div className="agri-card">
+          <h2 className="text-lg font-semibold mb-4">
+            Logistics Route Map - {district}
+          </h2>
+              <iframe
+                src={mapUrl}
+                title={`Logistics map for ${district}`}
+                className="w-full h-[600px] rounded-xl border"
+                loading="lazy"
+              />
+
+
+
+        </div>
+      )}
+>>>>>>> 275b2b8fe38f187a469b7f1a67a8f35f99b033ee
     </div>
   );
 };

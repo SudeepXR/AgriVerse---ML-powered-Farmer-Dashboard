@@ -3,6 +3,7 @@ from flask_cors import CORS # 1. Import CORS
 from werkzeug.security import generate_password_hash, check_password_hash
 from backend.database.db import get_db
 from flask import jsonify, request
+<<<<<<< HEAD
 try:
     from backend.disease_classifier import diagnose_plant_image
 except Exception as e:
@@ -30,11 +31,17 @@ except Exception as e:
     print(f"WARNING: Shelf life service could not be loaded: {e}")
     shelf_life_service = None
 
+=======
+from backend.disease_classifier import diagnose_plant_image
+from backend.sentiment_analyser_model import analyze_crop
+from backend.price_predictor.app import predict
+>>>>>>> 275b2b8fe38f187a469b7f1a67a8f35f99b033ee
 import google.generativeai as genai
 import requests
 import os
 import pickle
 import sys
+<<<<<<< HEAD
 try:
     from backend.surplus_deficit.scripts.visualization_routes import (
         visualize_routes_with_farmer_highlight
@@ -43,6 +50,11 @@ except ImportError:
     print("WARNING: Visualization routes module not found.")
     def visualize_routes_with_farmer_highlight(farmer_city=None, output_dir=None):
         return "map_unavailable.html"
+=======
+from backend.surplus_deficit.scripts.visualization_routes import (
+    visualize_routes_with_farmer_highlight
+)
+>>>>>>> 275b2b8fe38f187a469b7f1a67a8f35f99b033ee
 
 
 
@@ -76,12 +88,19 @@ app = Flask(__name__)
 CORS(app) # 2. Enable CORS
 
 #genai API CONFIG
+<<<<<<< HEAD
 #genai API CONFIG
 api_key = os.environ.get("GOOGLE_API_KEY")
 if not api_key:
     print("WARNING: GOOGLE_API_KEY not set in environment. AI features will not work.")
 else:
     genai.configure(api_key=api_key)
+=======
+api_key = os.environ.get("GOOGLE_API_KEY")
+if not api_key:
+    raise RuntimeError("GOOGLE_API_KEY not set in environment")
+genai.configure(api_key=api_key)
+>>>>>>> 275b2b8fe38f187a469b7f1a67a8f35f99b033ee
 
 
 
@@ -519,6 +538,7 @@ Rules:
 User question:
 {user_message}
 """
+<<<<<<< HEAD
     if not api_key:
         return jsonify({"reply": "I'm sorry, I cannot answer questions right now because the API key is missing."})
 
@@ -527,6 +547,10 @@ User question:
         response = model.generate_content(prompt)
     except Exception as e:
         return jsonify({"reply": f"Error communicating with AI: {str(e)}"})
+=======
+    model = genai.GenerativeModel("gemini-2.5-flash")
+    response = model.generate_content(prompt)
+>>>>>>> 275b2b8fe38f187a469b7f1a67a8f35f99b033ee
 
     return jsonify({
         "reply": response.text
@@ -555,6 +579,7 @@ def diagnose():
         Keep it very brief (max 100 words).
         """
         
+<<<<<<< HEAD
         if api_key:
             try:
                 model = genai.GenerativeModel("gemini-2.5-flash")
@@ -564,6 +589,11 @@ def diagnose():
                 result["karnataka_advice"] = f"Could not fetch advice: {str(e)}"
         else:
              result["karnataka_advice"] = "AI advice unavailable (Missing API Key)."
+=======
+        model = genai.GenerativeModel("gemini-2.5-flash")
+        ai_response = model.generate_content(local_prompt)
+        result["karnataka_advice"] = ai_response.text
+>>>>>>> 275b2b8fe38f187a469b7f1a67a8f35f99b033ee
     return jsonify(result)
 
 
@@ -781,6 +811,7 @@ def get_logistics_map():
             "error": f"Failed to generate map: {str(e)}"
         }), 500
 
+<<<<<<< HEAD
 @app.route("/api/shelf-life/predict", methods=["POST"])
 def predict_shelf_life_route():
     if not shelf_life_service:
@@ -800,6 +831,8 @@ def predict_shelf_life_route():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+=======
+>>>>>>> 275b2b8fe38f187a469b7f1a67a8f35f99b033ee
 @app.route("/api/head/farmers/<int:head_id>", methods=["GET"])
 def get_farmers_for_head(head_id):
     conn = get_db()
