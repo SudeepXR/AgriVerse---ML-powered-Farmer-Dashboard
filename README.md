@@ -88,7 +88,7 @@ This is a **full-stack farming advisory system** that combines:
 - Route optimization for food distribution
 - Farmer location visualization
 - Shipment tracking and planning
-- Shelf life prediction for perishables
+- **Shelf Life Prediction** for perishable crops based on climate and transport conditions
 
 ---
 
@@ -115,8 +115,26 @@ EL_3/
 │       │   ├── app.py                  # Price prediction model
 │       │   └── models/
 │       │       └── global_lstm.h5      # Trained LSTM model
+│       ├── shelf_life/
+│       │   ├── __init__.py            # Python package marker
+│       │   ├── predict.py              # Shelf-life prediction module
+│       │   ├── train_model.py          # Shelf-life model training
+│       │   └── shelf_life_model.pkl    # Trained model (not committed)
 │       ├── static/
 │       │   └── maps/                   # Generated logistics maps (not committed)
+│       ├── cropRecommender/            # Crop recommendation ML service
+│       │   ├── README.md
+│       │   ├── requirements.txt
+│       │   ├── data/
+│       │   ├── models/
+│       │   ├── src/
+│       │   │   ├── config.py
+│       │   │   ├── inference/
+│       │   │   ├── service/
+│       │   │   ├── training/
+│       │   │   ├── validation/
+│       │   │   └── explainability/
+│       │   └── tests/
 │       ├── surplus_deficit/            # Supply chain & logistics module
 │       │   ├── __init__.py            # Python package marker
 │       │   ├── requirements.txt        # Logistics dependencies
@@ -299,9 +317,10 @@ export GOOGLE_API_KEY="your-gemini-api-key"
 # On Windows: set GOOGLE_API_KEY=your-gemini-api-key
 ```
 
-5. **Install surplus deficit module dependencies (optional):**
+5. **Install surplus deficit & shelf-life module dependencies (optional):**
 ```bash
 pip install -r surplus_deficit/requirements.txt
+pip install -r shelf_life/requirements.txt
 ```
 
 6. **Run Flask server:**
@@ -666,6 +685,112 @@ Error (400 Bad Request):
 
 ---
 
+### Logistics & Supply Chain
+
+#### 11. **Shelf Life Prediction**
+```
+POST /api/shelf-life/predict
+Content-Type: application/json
+
+Request:
+{
+  "farmer_id": 1,                    // ID of farmer (required)
+  "harvest_date": "2026-01-21",      // Date in YYYY-MM-DD format (required)
+  "transport_hours": 12,              // Duration in hours (required)
+  "storage_district": "Mandya"        // Karnataka district for climate data (optional)
+}
+
+Response (200 OK):
+{
+  "success": true,
+  "crop": "Rice",
+  "storage_district": "Mandya",
+  "prediction": {
+    "base_shelf_life_days": 15,
+    "final_shelf_life_days": 12,
+    "risk_level": "Low",
+    "temperature": 28.5,
+    "humidity": 65.2
+  }
+}
+
+Error (400 Bad Request):
+{
+  "error": "Missing fields: farmer_id, harvest_date"
+}
+
+Error (404 Not Found):
+{
+  "error": "Invalid farmer_id"
+}
+```
+
+**Features:**
+- Calculates remaining shelf-life based on harvest date and climate conditions
+- Considers temperature, humidity, and transport duration impact
+- Returns risk level (Low/Medium/High) for spoilage assessment
+- Uses NASA POWER API for historical/climatology weather data
+- Helps farmers optimize post-harvest logistics and storage planning
+
+---
+
+#### 12. **Get Logistics Map**
+```
+GET /api/logistics/map?district=Mandya
+
+Required Query Parameters:
+- district: Karnataka district name
+
+Response (200 OK):
+{
+  "success": true,
+  "district": "Mandya",
+  "map_url": "http://localhost:5000/static/maps/shipment_map_xxxxx.html"
+}
+
+Error (400 Bad Request):
+{
+  "error": "district query parameter is required"
+}
+```
+
+**Features:**
+- Visualizes food surplus & deficit routes on interactive map
+- Displays farmer locations and shipment optimization
+- Dynamically generated per district request
+
+---
+
+### Farmer Management (for Farm Heads)
+
+#### 13. **Get Assigned Farmers**
+```
+GET /api/head/farmers/<head_id>
+
+Response (200 OK):
+{
+  "farmers": [
+    {
+      "id": 1,
+      "full_name": "John Farmer",
+      "village": "Harohalli",
+      "district": "Bangalore Rural"
+    },
+    {
+      "id": 2,
+      "full_name": "Jane Farmer",
+      "village": "Hoskote",
+      "district": "Bangalore Rural"
+    }
+  ]
+}
+```
+
+**Features:**
+- Retrieves all farmers accessible to a farm head
+- Auto-assigned when head logs in
+- Used by TopBar farmer selector dropdown
+
 ## � State Management (React Contexts)
 
 ### AuthContext
@@ -706,7 +831,7 @@ Provides multi-language support for the dashboard.
 | Climate | `/climate` | Weather forecasts & climate risk assessment |
 | Market Profit | `/market-profit` | Price predictions & market trend analysis |
 | Crop Recommendation | `/crop-recommendation` | AI-suggested crops based on conditions |
-| Yield Planning | `/yield-planning` | Yield forecasting & growth projections |
+| Yield Planning | `/yield-planning` | Yield forecasting, logistics mapping & shelf-life prediction |
 | AI Assistant | `/ai-assistant` | Chatbot interface for farming advice |
 | Not Found | `/404` | Error page for undefined routes |
 
@@ -716,6 +841,16 @@ Provides multi-language support for the dashboard.
 
 ### Environment Variables (Backend)
 ```bash
+GOOGLE_API_KEY=your-gemini-api-key-here
+FLASK_ENV=development
+FLASK_DEBUG=True
+```
+
+### Database Configuration
+- **Type:** SQLite
+- **Location:** `scripts/backend/database/agriculture.db`
+- **Auto-initialized** on first app startup via `init_db.py`
+- **Path Resolution:** Uses `os.path` for cross-platform compatibility
 GOOGLE_API_KEY=your-gemini-api-key-here
 FLASK_ENV=development
 FLASK_DEBUG=True
